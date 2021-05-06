@@ -1,0 +1,84 @@
+PREREQUISITES: 
+    Have Docker installed and running.
+    Install Redis.
+SETUP:
+    >REDIS:
+        -redis-server  //to run the redis server locally
+    >POSTGRES:
+        -docker run -p 5432:5432 --name postgres-docker postgres
+        -docker exec -it postgres-docker bash (opens up postgres console)
+        //set up the postgres credentials username and password.
+        -run the following queries for creating the necessary tables
+            >CREATE TABLE friendrequests(
+                request_id int serial PRIMARY KEY,
+                sentby int,
+                receivedby int,
+                sentby_email varchar
+            );
+            >CREATE TABLE friends(
+                id int serial PRIMARY KEY,
+                uid int, 
+                friendid int
+            );
+            >CREATE TABLE post(
+                id int serial PRIMARY KEY,
+                uid int,
+                post varchar
+            );
+            >CREATE TABLE userdet(
+                id int serial PRIMARY KEY,
+                email varchar,
+                password varchar
+            );
+
+SERVER endpoints:
+    >/auth/register: A POST method to create an account where the body is of format {
+        "email": //email,
+        "password": //password'
+    }
+        user needs to go to /auth/login after this to get the auth-token
+    
+    >/auth/login: A POST method where the body is of format {
+        "email": //email,
+        "password": //password
+    }
+    the auth-token received needs to be added to the header with key "auth-token" for the rest of the routes.
+
+    >/auth/changePassword: A POST method to change password for a user where the body is of format {
+        "oldPassword": //old password
+        "newPassword": //new password
+    }
+    the user needs to be logged in and have the auth-token in the header when sending in the request.
+
+    >/post/addPost: A POST method to add a post where the body is of format {
+        post: //post description
+    }
+
+    >/post/viewPost: A GET method to view all posts for an user
+
+    >/post/deletePost: A POST method to delete a post where the body is of format {
+        "id" : //id of the post to be deleted
+    } 
+
+    >/social/sendRequest: A POST method to send a friend request where the body is of format {
+        "email" : //email of the user to send the request
+    }
+
+    >/social/viewRequests: A GET method to view all received friend requests.
+
+    >/social/respondToRequest: A POST method to respond to a friend request where the body is of format {
+        "id" : //id of the user(in userdet) whose request to be responded
+        "status" :  //pass 'AC' to accept and "R"(any other value) to reject
+    }
+
+    >/social/viewAllFriends: A GET method to see the list of all friends.
+
+    >/social/viewFriendsofFriends: A POST method to view the list of all friends of a friends where the body is of format {
+        "email": //email of the friend whose friendlist is to be viewed
+    }
+
+    >/social/viewMututalFriends: A POST method to view all mututal friends with a friend where the body is of format {
+        "email": //email of the friend whose mutual friend lists is to be viewed.
+    }
+
+
